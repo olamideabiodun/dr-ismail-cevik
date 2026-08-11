@@ -1,0 +1,453 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Design tokens — design.md §2 (colour), §3 (type), §4 (layout & elevation).
+
+   Tailwind v4 is configured in CSS rather than tailwind.config.ts: the `@theme`
+   block below IS the config, and it generates the utilities (bg-brand, text-ink,
+   rounded-card, shadow-card, …) used throughout the app.
+
+   The palette is deliberately light-only. This is a clinical brand built on warm
+   off-white; `color-scheme: light` stops browsers from auto-inverting it.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #fbfbf9;          /* warm off-white base */
+  --bg-elevated: #ffffff;
+
+  /* Ink */
+  --ink: #0e1512;         /* near-black, slight green undertone */
+  --ink-soft: #48544e;
+  --muted: #8a938d;
+  --line: #e7e9e4;
+
+  /* Brand — surgical teal-green, tied to the scrubs in the hero */
+  --brand: #1f6f5c;
+  --brand-600: #17594a;
+  --brand-300: #6fb3a2;
+  --brand-tint: #e9f3ef;
+
+  /* Restrained gold, for micro-accents only */
+  --accent: #c9a24b;
+
+  /* Glassmorphism over the hero */
+  --glass: rgba(255, 255, 255, 0.1);
+  --glass-stroke: rgba(255, 255, 255, 0.35);
+
+  /* Hero scrim — keeps AA contrast for text laid over the operating photo */
+  --hero-overlay: linear-gradient(
+    180deg,
+    rgba(9, 20, 17, 0.15),
+    rgba(9, 20, 17, 0.55)
+  );
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-600: var(--brand-600);
+  --color-brand-300: var(--brand-300);
+  --color-brand-tint: var(--brand-tint);
+  --color-accent: var(--accent);
+  --color-glass: var(--glass);
+  --color-glass-stroke: var(--glass-stroke);
+
+  /* Poppins sets the headings; DM Sans carries the interface and body copy.
+     They share a geometric skeleton, so the pair reads as one voice, but DM Sans
+     is narrower with a taller x-height and stays comfortable at 15px where
+     Poppins would feel wide and loose. */
+  --font-display: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* NOTE: Tailwind's own text-xs … text-4xl are deliberately left alone.
+     They used to be overridden here with design.md §3's modular scale, which
+     silently inflated every utility in the codebase — `text-lg` became 24px and
+     `text-xl` became 32px, so card titles and body copy rendered at heading
+     sizes. The editorial scale lives in its own namespace instead.
+
+     Sizes are calibrated against the HorizonX reference, which is deliberately
+     restrained: ~40px section headings, ~17px card titles, ~14px descriptions.
+     Big type is not what makes a page feel premium — spacing and restraint are. */
+  --text-display-xs: 1.0625rem;
+  --text-display-sm: clamp(1.25rem, 1.9vw, 1.5rem);
+  --text-display-md: clamp(1.625rem, 2.8vw, 2.25rem);
+  --text-display-lg: clamp(1.875rem, 3.6vw, 2.75rem);
+  --text-display-xl: clamp(2.25rem, 4.6vw, 3.75rem);
+
+  /* Emil Kowalski's stronger curves — the CSS built-ins are too weak to read as
+     intentional. `ease-in` is never used on UI: it delays the first frame, which
+     is exactly when the user is looking. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* design.md §4 */
+  --radius-input: 12px;
+  --radius-card: 20px;
+  --radius-image: 24px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(14, 21, 18, 0.06);
+  --shadow-card: 0 20px 60px -20px rgba(14, 21, 18, 0.18);
+  --shadow-lift: 0 28px 70px -24px rgba(14, 21, 18, 0.26);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =============================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    /* Next 16 no longer overrides scroll-behavior during navigation unless
+       data-scroll-behavior="smooth" is set on <html> (see layout.tsx), so
+       in-page anchors stay smooth while route changes still jump instantly. */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    /* 15px, matching the reference. 16px DM Sans reads noticeably large next to
+       type this restrained. */
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--brand);
+    color: #fff;
+  }
+
+  /* design.md §7 — a visible 2px brand ring, never `outline: none` */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    /* Poppins is geometric and already fairly tight; the -0.03em that suited a
+       high-contrast serif collapses its counters here. */
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Stats and time slots read as columns of digits, not words. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* =============================================================================
+   Above-the-fold entrance — CSS, not JavaScript.
+
+   Motion writes its `initial` state into the server-rendered HTML as inline
+   `opacity:0`, and only animates once React has hydrated. For content below the
+   fold that is invisible and fine. For the hero it is not: the headline is the
+   LCP element, so painting it would wait on hydration (design.md §8 budgets
+   LCP < 2.5s), and if JS is slow, blocked or broken the hero — including the
+   booking CTA — never appears at all.
+
+   These keyframes start at first paint instead, with the same easing and the
+   same 0.08s stagger as the Motion tokens, so the hero looks identical while
+   depending on nothing but CSS. The reduced-motion block below neutralises them
+   along with everything else.
+   ========================================================================== */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise, 1rem));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enter {
+  animation: rise-in 0.6s var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Per-word stagger: each child carries its index in `--i`. */
+.enter-words > span {
+  display: inline-block;
+  --rise: 0.4em;
+  animation: rise-in 0.55s var(--ease-out-soft) both;
+  animation-delay: calc(var(--delay, 0s) + var(--i, 0) * 0.08s);
+}
+
+/* =============================================================================
+   Reduced motion — design.md §6.
+   Transforms are dropped wholesale; opacity is left alone so content still
+   fades in rather than popping. Motion's own components additionally read
+   useReducedMotion() so they never even schedule a transform animation.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   Component utilities
+   ========================================================================== */
+
+@layer components {
+  /* 12-col grid, max 1280px, 24px gutters (16px on mobile) — design.md §4 */
+  .container-page {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  /* Section rhythm: 96–160px desktop, 64–96 mobile */
+  .section {
+    padding-block: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 6rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .section {
+      padding-block: 10rem;
+    }
+  }
+
+  /* Giant editorial ghost heading sitting behind content — design.md §3 */
+  .ghost-heading {
+    font-family: var(--font-display);
+    /* Pulled back from 14vw/16rem: at desktop widths it grew taller than the
+       heading it sits behind and read as a second headline rather than texture. */
+    font-size: clamp(3rem, 9vw, 9rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 0.8;
+    color: color-mix(in oklab, var(--ink) 5%, transparent);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* Floating glass stat card over the hero — design.md §5 */
+  .glass-card {
+    background-color: var(--glass);
+    border: 1px solid var(--glass-stroke);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: var(--radius-card);
+  }
+
+  .hero-scrim {
+    background: var(--hero-overlay);
+  }
+
+  /* ---------------------------------------------------------------------
+     Display type
+
+     These are classes, not `text-*` utilities, on purpose. `cn()` runs
+     tailwind-merge, which resolves conflicts by prefix — and it has no way to
+     know that `text-display-xl` is a font size rather than a colour, since the
+     token is custom. So `cn("text-white", "text-display-xl")` silently dropped
+     `text-white` and the hero headline rendered near-black on a dark hero.
+     A distinct prefix removes the ambiguity entirely.
+     --------------------------------------------------------------------- */
+
+  .display-xs { font-size: var(--text-display-xs); }
+  .display-sm { font-size: var(--text-display-sm); }
+  .display-md { font-size: var(--text-display-md); }
+  .display-lg { font-size: var(--text-display-lg); }
+  .display-xl { font-size: var(--text-display-xl); }
+
+  /* ---------------------------------------------------------------------
+     Cards
+     --------------------------------------------------------------------- */
+
+  .card {
+    border: 1px solid var(--line);
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition:
+      border-color 200ms ease,
+      box-shadow 240ms var(--ease-out),
+      transform 240ms var(--ease-out);
+  }
+
+  /* Hover effects are gated: touch devices fire :hover on tap, which leaves a
+     card stuck in its hovered state after the finger lifts. */
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      border-color: color-mix(in oklab, var(--brand) 35%, var(--line));
+      box-shadow: var(--shadow-card);
+      transform: translateY(-4px);
+    }
+
+    .card:hover .card-media img {
+      transform: scale(1.04);
+    }
+  }
+
+  .card-media img {
+    transition: transform 600ms var(--ease-out);
+  }
+
+  /* Emil: every pressable thing confirms the press. 160ms, ease-out, subtle. */
+  .press {
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  /* ---------------------------------------------------------------------
+     Section backgrounds — texture, never pattern-for-its-own-sake
+     --------------------------------------------------------------------- */
+
+  /* Faint surgical-green wash bleeding from one corner. */
+  .bg-glow {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .bg-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(
+        60% 50% at 85% 0%,
+        color-mix(in oklab, var(--brand) 9%, transparent) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 45% at 0% 100%,
+        color-mix(in oklab, var(--brand-300) 12%, transparent) 0%,
+        transparent 70%
+      );
+    pointer-events: none;
+  }
+
+  /* Hairline grid, fading out downward. Reads as graph paper, not decoration. */
+  .bg-grid {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .bg-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 75%);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 75%);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /* Long-form article body (blog + treatment detail) */
+  .prose-clinic {
+    max-width: 68ch;
+  }
+
+  .prose-clinic > * + * {
+    margin-top: 1.25rem;
+  }
+
+  .prose-clinic h2 {
+    font-size: var(--text-display-sm);
+    margin-top: 3rem;
+  }
+
+  .prose-clinic h3 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .prose-clinic p,
+  .prose-clinic li {
+    color: var(--ink-soft);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  .prose-clinic ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .prose-clinic ol {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+
+  .prose-clinic a {
+    color: var(--brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose-clinic strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
+
+/* Hide scrollbars on the drag carousel without losing keyboard scrolling. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
