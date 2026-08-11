@@ -1,0 +1,50 @@
+{
+  "name": "dr-ismail-cevik",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:test": "docker exec -i supabase_db_dr-ismail-cevik psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/tests/booking_smoke.sql",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/types.ts"
+  },
+  "dependencies": {
+    "@date-fns/tz": "^1.5.0",
+    "@hookform/resolvers": "^5.7.1",
+    "@react-email/render": "^2.1.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "gray-matter": "^4.0.3",
+    "motion": "^13.1.0",
+    "next": "16.3.0",
+    "next-intl": "^4.13.6",
+    "next-mdx-remote": "^6.0.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "^7.85.0",
+    "resend": "^6.18.1",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
