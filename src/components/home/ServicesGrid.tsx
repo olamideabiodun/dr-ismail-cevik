@@ -25,7 +25,7 @@ export async function ServicesGrid() {
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           stagger={0.06}
         >
-          {FEATURED_SERVICES.map((service) => (
+          {FEATURED_SERVICES.slice(0, 3).map((service) => (
             <RevealItem as="li" key={service.slug}>
               <ServiceCard service={service} locale={locale} />
             </RevealItem>

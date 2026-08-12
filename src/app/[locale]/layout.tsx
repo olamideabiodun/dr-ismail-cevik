@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Poppins } from "next/font/google";
+import { DM_Sans, Jost, Poppins } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -23,6 +23,15 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   display: "swap",
   weight: ["400", "500"],
+});
+
+/* Jost, scoped to the hero name only via the `font-hero` utility
+   (globals.css) — everywhere else keeps using Poppins. */
+const jost = Jost({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-jost",
+  display: "swap",
+  weight: ["700"],
 });
 
 export function generateStaticParams() {
@@ -76,7 +85,7 @@ export default async function LocaleLayout({
       // attribute is present. Without it, `scroll-behavior: smooth` from
       // globals.css would make every route change scroll slowly to the top.
       data-scroll-behavior="smooth"
-      className={`${dmSans.variable} ${poppins.variable}`}
+      className={`${dmSans.variable} ${poppins.variable} ${jost.variable}`}
     >
       <body className="bg-bg text-ink antialiased">
         {/* Chrome lives in the route-group layouts below this one: the public

@@ -18,11 +18,9 @@
   "home": {
     "hero": {
       "eyebrow": "ENT & Rhinoplasty — Gaziantep",
-      "headline": "Breathing and proportion, treated as one.",
-      "sub": "Op. Dr. İsmail Çevik. Rhinoplasty, sinus and sleep surgery — planned without separating how a nose looks from how it works.",
-      "ctaPrimary": "Book an appointment",
-      "ctaSecondary": "See treatments",
-      "imageAlt": "Op. Dr. İsmail Çevik operating in green surgical scrubs"
+      "imageAlt": "Op. Dr. İsmail Çevik operating in green surgical scrubs",
+      "cardText": "Rhinoplasty, sinus and sleep surgery — planned around you.",
+      "ctaPrimary": "Book Appointment"
     },
     "stats": {
       "operations": "Operations",

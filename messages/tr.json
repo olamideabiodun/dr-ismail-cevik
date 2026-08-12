@@ -18,11 +18,9 @@
   "home": {
     "hero": {
       "eyebrow": "Kulak Burun Boğaz & Rinoplasti — Gaziantep",
-      "headline": "Nefesi ve oranı aynı anda düşünen cerrahi.",
-      "sub": "Op. Dr. İsmail Çevik. Burun estetiği, sinüs ve uyku cerrahisinde; görünümü işlevden ayırmadan planlanan tedavi.",
-      "ctaPrimary": "Randevu Al",
-      "ctaSecondary": "Tedavileri İncele",
-      "imageAlt": "Op. Dr. İsmail Çevik ameliyathanede, yeşil cerrahi önlükle operasyon sırasında"
+      "imageAlt": "Op. Dr. İsmail Çevik ameliyathanede, yeşil cerrahi önlükle operasyon sırasında",
+      "cardText": "Burun estetiği, sinüs ve uyku cerrahisi — size özel planlanır.",
+      "ctaPrimary": "Randevu Al"
     },
     "stats": {
       "operations": "Ameliyat",

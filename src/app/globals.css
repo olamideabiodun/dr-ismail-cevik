@@ -36,13 +36,6 @@
   /* Glassmorphism over the hero */
   --glass: rgba(255, 255, 255, 0.1);
   --glass-stroke: rgba(255, 255, 255, 0.35);
-
-  /* Hero scrim — keeps AA contrast for text laid over the operating photo */
-  --hero-overlay: linear-gradient(
-    180deg,
-    rgba(9, 20, 17, 0.15),
-    rgba(9, 20, 17, 0.55)
-  );
 }
 
 @theme inline {
@@ -66,6 +59,10 @@
      Poppins would feel wide and loose. */
   --font-display: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-dm-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Jost, for the hero headline only — see layout.tsx. Not part of the
+     sitewide display/sans pair above, so it gets its own token. */
+  --font-hero: var(--font-jost), "Jost", ui-sans-serif, system-ui, sans-serif;
 
   /* NOTE: Tailwind's own text-xs … text-4xl are deliberately left alone.
      They used to be overridden here with design.md §3's modular scale, which
@@ -199,6 +196,48 @@
   animation-delay: calc(var(--delay, 0s) + var(--i, 0) * 0.08s);
 }
 
+/* Per-word mask reveal for the hero headline: each word rises up from behind
+   an overflow-hidden clip instead of just fading+rising like .enter-words.
+   Reuses the same rise-in keyframe and --i/--delay contract — only --rise
+   changes, to 100% so the word starts fully hidden behind the mask edge. */
+.enter-mask > span {
+  display: inline-block;
+  --rise: 100%;
+  animation: rise-in 0.55s var(--ease-out-soft) both;
+  animation-delay: calc(var(--delay, 0s) + var(--i, 0) * 0.06s);
+}
+
+/* Hero frame lines draw themselves in from a zero-length scale, using the
+   element's own origin (origin-left / origin-top) so a horizontal line grows
+   rightward and a vertical line grows downward. */
+@keyframes line-draw-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes line-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.line-draw-x {
+  animation: line-draw-x 1.8s var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.line-draw-y {
+  animation: line-draw-y 1.8s var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0s);
+}
+
 /* =============================================================================
    Reduced motion — design.md §6.
    Transforms are dropped wholesale; opacity is left alone so content still
@@ -279,10 +318,6 @@
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
     border-radius: var(--radius-card);
-  }
-
-  .hero-scrim {
-    background: var(--hero-overlay);
   }
 
   /* ---------------------------------------------------------------------

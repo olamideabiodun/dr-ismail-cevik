@@ -1,47 +1,44 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { WordStagger } from "@/components/motion/WordStagger";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 import { Parallax } from "@/components/motion/Parallax";
-import { CountUp } from "@/components/motion/animos";
-import { ButtonLink } from "@/components/ui/Button";
+import { WordReveal } from "@/components/motion/WordReveal";
 import { Figure } from "@/components/ui/Figure";
-import { PRACTICE_STATS } from "@/content/site";
+import { ButtonLink } from "@/components/ui/Button";
+import { HeroFrame } from "@/components/home/HeroFrame";
+import { CLINIC, DOCTOR } from "@/lib/constants";
 
 /**
- * Cinematic full-bleed hero — design.md §1, §5, §6.
+ * Full-bleed hero: his name (bold, one line) with a subtitle, thin
+ * architectural line accents, a clinic credit bottom-left, and a glass
+ * card + booking CTA on the right — per the approved design reference.
  *
- * Layers, back to front: parallax operating photograph → gradient scrim →
- * oversized display headline → floating glass stat cards.
+ * The scrim only covers the bottom half of the photo, so the top of the
+ * image renders at full clarity — only the lower half, behind the name,
+ * darkens for AA contrast.
  *
- * The scrim is what lets white type pass AA over an unpredictable photograph;
- * it is not decorative and should not be removed.
- *
- * Every entrance here is CSS (`.enter`, `.enter-words`), not Motion. Motion
- * bakes `opacity:0` into the server HTML and only animates after hydration,
- * which would leave the headline — the LCP element — and the booking CTA
- * invisible until JS runs. Below the fold that trade is fine; here it is not.
- * Only the parallax drift stays JS-driven, and it degrades to a still image.
+ * The name's entrance is CSS (`.enter-mask`), not Motion: it's the LCP
+ * element and must paint before hydration. Only the parallax drift stays
+ * JS-driven, and it degrades to a still image under prefers-reduced-motion.
  */
 export function Hero() {
   const t = useTranslations("home.hero");
-  const tStats = useTranslations("home.stats");
-  const locale = useLocale();
+  const ctaRef = useRef<HTMLSpanElement>(null);
+  const [cardWidth, setCardWidth] = useState<number>();
 
-  // Turkish writes the percent sign before the number (%98); English after (98%).
-  const percent = locale === "tr" ? { prefix: "%" } : { suffix: "%" };
-
-  // Only confirmed figures are published. See PRACTICE_STATS for why this
-  // currently renders nothing — the brief's "265+ ameliyat" turned out to be
-  // his Instagram post count, not an operation count.
-  const stats = PRACTICE_STATS.filter((stat) => stat.verified).map((stat) => ({
-    value: stat.value,
-    label: tStats(stat.key),
-    ...(stat.key === "satisfaction" ? percent : { suffix: "+" }),
-  }));
-
-  const delay = (seconds: number) => ({ "--delay": `${seconds}s` }) as CSSProperties;
+  // The card's width should match the CTA button, not the other way around —
+  // the button keeps its natural (unstretched) size and the text wraps to
+  // fit it. Measured in a layout effect so it resolves before paint.
+  useLayoutEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const update = () => setCardWidth(el.offsetWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className="relative isolate min-h-[100svh] overflow-hidden bg-ink">
@@ -55,82 +52,70 @@ export function Hero() {
           sizes="100vw"
           priority
           quality={90}
-          // The source is square but the hero is full-bleed landscape, so
-          // object-cover crops top and bottom. Centred, that slices through his
-          // head; pulling the focal point up keeps the face and the headlamp in
-          // frame at desktop widths and still reads on a portrait phone.
-          imageClassName="object-[50%_30%]"
-          // Everything laid over this is white. If the photograph is ever
-          // missing, the fallback has to be dark or the hero is unreadable.
           placeholderTone="dark"
         />
       </Parallax>
 
-      <div aria-hidden className="hero-scrim absolute inset-0" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/70 to-transparent"
+      />
 
-      <div className="container-page relative flex min-h-[100svh] flex-col justify-end pb-16 pt-32 md:pb-24">
-        <p className="enter mb-6 text-xs font-medium uppercase tracking-[0.22em] text-white/75">
-          {t("eyebrow")}
-        </p>
+      <HeroFrame />
 
-        {/* design.md §3 specifies clamp(3.2rem, 9vw, 8.5rem). That was sized for
-            the reference's three-word headline; at 1440px it renders ~129px and
-            a real sentence pushes the sub-copy, CTAs and stat cards off screen.
-            Pulled back to keep the whole hero in one viewport — still oversized
-            and editorial, which is what the spec is actually after. */}
-        <WordStagger
-          as="h1"
-          text={t("headline")}
-          className="max-w-[15ch] text-white display-xl [letter-spacing:-0.03em] [line-height:0.95]"
-          delay={0.1}
-        />
+      {/* pointer-events-none: this box spans the full hero (min-h-[100svh])
+          so the cursor-follow drift on the image below can receive pointer
+          events even where there's no visible text. Nothing in here is
+          interactive today — if that changes, give the interactive element
+          its own pointer-events-auto rather than removing this. */}
+      <div className="pointer-events-none container-page relative flex min-h-[100svh] flex-col justify-end pb-10 pt-32 text-left md:pb-14">
+        <div>
+          <WordReveal
+            as="h1"
+            text={DOCTOR.name}
+            className="font-hero whitespace-nowrap font-bold uppercase text-white [font-size:clamp(1.5rem,6.5vw,4.5rem)] [letter-spacing:0.01em]"
+            delay={0.1}
+          />
 
-        <p
-          className="enter mt-8 max-w-xl text-lg leading-relaxed text-white/85"
-          style={delay(0.5)}
-        >
-          {t("sub")}
-        </p>
-
-        <div
-          className="enter mt-10 flex flex-wrap items-center gap-3"
-          style={delay(0.62)}
-        >
-          <ButtonLink href="/randevu" size="lg" variant="onDark">
-            {t("ctaPrimary")}
-          </ButtonLink>
-          <ButtonLink
-            href="/tedaviler"
-            size="lg"
-            className="border border-white/40 bg-transparent text-white hover:bg-white/10"
+          <p
+            className="enter mt-1.5 text-sm uppercase tracking-[0.18em] text-white/75"
+            style={{ "--delay": "0.4s" } as CSSProperties}
           >
-            {t("ctaSecondary")}
-          </ButtonLink>
+            {t("eyebrow")}
+          </p>
         </div>
 
-        {/* Stats were three stacked glass panels floating at the right, which
-            competed with the headline for attention and crowded the viewport.
-            Reduced to one quiet inline rule: a fraction of the weight, and it
-            no longer fights the CTA. Renders nothing while every figure is
-            still unverified. */}
-        <ul
-          className="enter mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-white/15 pt-6 empty:hidden empty:border-0 sm:gap-x-12"
-          style={delay(0.78)}
+        <p
+          className="enter mt-8 max-w-[16rem] text-sm leading-relaxed text-white/70"
+          style={{ "--delay": "0.55s" } as CSSProperties}
         >
-          {stats.map((stat) => (
-            <li key={stat.label} className="flex items-baseline gap-2.5">
-              <CountUp
-                value={stat.value}
-                prefix={stat.prefix}
-                suffix={stat.suffix}
-                className="tabular font-display text-xl leading-none text-white"
-              />
-              <span className="text-xs tracking-wide text-white/60">
-                {stat.label}
-              </span>
-            </li>
-          ))}
-        </ul>
+          {CLINIC.name}
+        </p>
+
+        {/* Card and CTA are one unit — the button sits inside the card, at
+            its bottom — anchored to the bottom-right corner of the hero,
+            not vertically centered. */}
+        <div
+          className="enter glass-card pointer-events-auto absolute bottom-20 right-4 hidden w-fit flex-col items-stretch gap-5 p-5 md:bottom-24 md:right-8 lg:flex"
+          style={
+            {
+              "--delay": "0.65s",
+              width: cardWidth ? `${cardWidth + 48}px` : undefined,
+            } as CSSProperties
+          }
+        >
+          <p className="text-sm leading-relaxed text-white/90">{t("cardText")}</p>
+          <span ref={ctaRef} className="self-start">
+            <ButtonLink
+              href="/randevu"
+              variant="onDark"
+              size="md"
+              className="whitespace-nowrap rounded-[var(--radius-card)]"
+            >
+              {t("ctaPrimary")}
+            </ButtonLink>
+          </span>
+        </div>
       </div>
     </section>
   );
