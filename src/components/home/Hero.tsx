@@ -55,8 +55,13 @@ export function Hero() {
           sizes="100vw"
           priority
           quality={90}
-          // Everything laid over this is white. Until the operating photograph
-          // is dropped in, the fallback has to be dark or the hero is unreadable.
+          // The source is square but the hero is full-bleed landscape, so
+          // object-cover crops top and bottom. Centred, that slices through his
+          // head; pulling the focal point up keeps the face and the headlamp in
+          // frame at desktop widths and still reads on a portrait phone.
+          imageClassName="object-[50%_30%]"
+          // Everything laid over this is white. If the photograph is ever
+          // missing, the fallback has to be dark or the hero is unreadable.
           placeholderTone="dark"
         />
       </Parallax>
